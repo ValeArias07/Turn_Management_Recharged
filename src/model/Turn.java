@@ -8,7 +8,7 @@ public class Turn {
 	
 	public static String AS="ASSITED";
 	public static String NOAS="NOT ASSISTED";
-	public static String NOTD="NOT DEFINEAD";
+	public static String NOTD="NOT ATTENTED YET";
 	
 	public Turn(char letter_, String number_) {
 		letter=letter_;

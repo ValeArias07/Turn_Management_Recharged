@@ -1,7 +1,6 @@
 package model;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -12,11 +11,11 @@ public class RandomData {
 	private String[] address;
 	private String[] phone;
 	
-	public static String PATH_NAMES="G:/Eclipse/TurnManagement_Arias_Valentina/data/Names.txt";
-	public static String PATH_LASTNAMES="G:/Eclipse/TurnManagement_Arias_Valentina/data/LastNames.txt";
-	public static String PATH_ADRESS="G:/Eclipse/TurnManagement_Arias_Valentina/data/Address.txt";
-	public static String PATH_ID="G:/Eclipse/TurnManagement_Arias_Valentina/data/ID.txt";
-	public static String PATH_PHONE="G:/Eclipse/TurnManagement_Arias_Valentina/data/Phones.txt";
+	public static String PATH_NAMES="G:/Eclipse/TurnManagementRecharged/data/Names.txt";
+	public static String PATH_LASTNAMES="G:/Eclipse/TurnManagementRecharged/data/LastNames.txt";
+	public static String PATH_ADRESS="G:/Eclipse/TurnManagementRecharged/data/Address.txt";
+	public static String PATH_ID="G:/Eclipse/TurnManagementRecharged/data/ID.txt";
+	public static String PATH_PHONE="G:/Eclipse/TurnManagementRecharged/data/Phones.txt";
 	
 	public RandomData() throws IOException{
 		setNames();
@@ -61,16 +60,13 @@ public class RandomData {
 	return idNumber.length;		
 	}
 	public void setNames() throws IOException{
-		boolean found=false;
 		String name="";
 		BufferedReader brN= new BufferedReader(new FileReader(PATH_NAMES));
 		String line="";
 		while(line!=null) {
 			line=brN.readLine();
-			if(name==null) {
-				found=true;
-			}else {
-			name+=brN.readLine()+";";;
+			if(line!=null) {
+			name+=line+";";;
 			}
 		}
 		brN.close();
@@ -79,15 +75,12 @@ public class RandomData {
 	
 	public void setLastNames() throws IOException{
 		BufferedReader brLN= new BufferedReader(new FileReader(PATH_LASTNAMES));
-		boolean found1=false;
 		String lastName1="";
 		String line="";
 		while(line!=null) {
 			line=brLN.readLine();
-			if(lastName1==null) {
-				found1=true;
-			}else{
-				lastName1+=brLN.readLine()+";";
+			if(line!=null) {
+				lastName1+=line+";";
 			}
 		}
 		brLN.close();
@@ -96,50 +89,39 @@ public class RandomData {
 	}
 
 	public void setIdNumber() throws IOException{
-		boolean exit=false;
 		BufferedReader brI= new BufferedReader(new FileReader(PATH_ID));
 		String lineNumber="";
 		String line="";
+		
 		while(line!=null) {
 			line=brI.readLine();
-			if(line==null) {
-				exit=true;
-			}else {
+			if(line!=null) 
 				lineNumber+=brI.readLine()+";";
 		}
-	}
 		 brI.close();
 		idNumber=lineNumber.split(";");
 	}
 
 	public void setAddress() throws IOException {
-		boolean exit=false;
 		BufferedReader brA= new BufferedReader(new FileReader(PATH_ADRESS));
 		String lineAddress="";
 		String line="";
 		while(line!=null) {
 			line=brA.readLine();
-			if(line==null) {
-				exit=true;
-			}else {
-				lineAddress+=brA.readLine()+";";
-		}
+			if(line!=null) 
+				lineAddress+=line+";";
 	}
 		brA.close();
 	address=lineAddress.split(";");	
 }
 	public void setPhone() throws IOException{
-		boolean exit=false;
 		BufferedReader brA= new BufferedReader(new FileReader(PATH_PHONE));
 		String linePhone="";
 		String line="";
 		while(line!=null) {
 			line=brA.readLine();
-			if(line==null) {
-				exit=true;
-			}else {
-				linePhone+=brA.readLine()+";";
-		}
+			if(line!=null) 
+				linePhone+=line+";";
 	}
 		phone=linePhone.split(";");
 	}

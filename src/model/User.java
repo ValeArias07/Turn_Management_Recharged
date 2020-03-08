@@ -47,6 +47,16 @@ public class User {
 		return numDoc;
 	}
 	
+	public String searchSpecificTurn(String codeTurn) {
+		String m="-";
+		for (int i = 0; i < turns.size(); i++) {
+			if(turns.get(i).getComplete().equals(codeTurn)) {
+				m="The person "+name+" "+lastName+" with the ID "+ numDoc+ " had the turn "+codeTurn+" with the state "+turns.get(i).getState();
+			}
+		}
+		return m;
+	}
+	
 	public String getActiveTurn() {
 		String turnActive="";
 		boolean found=false;
@@ -118,7 +128,7 @@ public class User {
 	public String[] allStates() {
 		String[] m=new String[turns.size()];
 		for (int i = 0; i < turns.size(); i++) {
-			m[i]=turns.get(i).getComplete() +" "+ turns.get(i).getState();
+			m[i]="Code: "+turns.get(i).getComplete() +" Status: "+ turns.get(i).getState();
 		}
 		return m;
 	}

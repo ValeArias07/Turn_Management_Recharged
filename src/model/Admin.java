@@ -12,6 +12,7 @@ import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
+import CustomExceptions.TurnHadNoAssigned;
 
 
 public class Admin {
@@ -20,7 +21,8 @@ public class Admin {
 	private ArrayList <User> usersWithTurns;
 	private RandomData random;
 	
-	public static String PATH_REPORT1=" ";
+	public static String PATH_REPORT_SPECIFIC_PERSON="G:/Eclipse/TurnManagementRecharged/data/ReportSpecificPerson.txt";
+	public static String PATH_REPORT_SPECIFIC_TURN="G:/Eclipse/TurnManagementRecharged/data/ReportSpecificTurn.txt";
 
 	
 	public Admin() throws IOException {
@@ -30,16 +32,18 @@ public class Admin {
 ///////
 	}
 	
-	public void generateUsers(int numP) throws IOException, DocumentExistException, ObligatoryFieldsException{
+	public String generateUsers(int numP, int numGen) throws IOException, DocumentExistException, ObligatoryFieldsException{
+		String m="People generated Successfully";
 		for (int i = 0; i < numP; i++) {
 			String typeDoc=random.getRandomTypes();
-			String id=random.getIdNumber(i);
+			String id=random.getIdNumber(i) + numGen;
 			String name=random.getNames((int)(Math.random()*random.getNamesLength()));
 			String lastName=random.getLastNames((int)(Math.random()*random.getLastNamesLength()));
 			String phone=random.getPhone((int)(Math.random()*random.getPhoneLength()));
 			String address=random.getAddress((int)(Math.random()*random.getNAddressLength()));
 			addUser(typeDoc, id, name, lastName, phone , address);
 			}
+		return m;
 	}
 	
 //////////////////////////////////////////////////////////Principal Methods//////////////////////////////////////////////////////////
@@ -131,16 +135,37 @@ public class Admin {
 		String m="Report Saved Successful ";
 		String[] all= userInUse.allStates();
 		if(option==1) {
+			m="The turns of the Person " +userInUse.getName()+" "+userInUse.getLastName()+" "+userInUse.getNumDoc()+" are:";
 			for (int i = 0; i < userInUse.allStates().length; i++) {
 				m+="\n"+all[i];
 			}
 		}else {
-			BufferedWriter bw= new BufferedWriter(new FileWriter(PATH_REPORT1));
+			BufferedWriter bw= new BufferedWriter(new FileWriter(PATH_REPORT_SPECIFIC_PERSON));
 			bw.write("The turns of the Person " +userInUse.getName()+" "+userInUse.getLastName()+" "+userInUse.getNumDoc()+" are:\n");
 			for (int i = 0; i < userInUse.allStates().length; i++) {
-				bw.write("\n"+all[i]);
+				bw.write(all[i]+"\n");
+				bw.flush();
 			}
 			bw.close();
+		}
+		return m;
+	}
+	
+	public String generateReportSpecificTurn(String codeTurn, int option) throws IOException, TurnHadNoAssigned {
+		String m="Report Saved";
+		if(option==1) {
+			m=searchTurnsInUser(codeTurn);
+		}else {
+			BufferedWriter bw= new BufferedWriter(new FileWriter(PATH_REPORT_SPECIFIC_TURN));
+			try {
+				bw.write(searchTurnsInUser(codeTurn));
+			}
+			catch(TurnHadNoAssigned tn) {
+				bw.write(tn.getMessage());
+			}
+			finally{
+				bw.close();
+			}
 		}
 		return m;
 	}
@@ -270,6 +295,17 @@ public class Admin {
 				throw new NotFoundException(numDoc);
 			}
 		return userFound;
+	}
+	
+	public String searchTurnsInUser(String codeTurn) throws TurnHadNoAssigned {
+		String m="";
+		for (int i = 0; i < usersWithTurns.size(); i++) {
+			if(!(usersWithTurns.get(i).searchSpecificTurn(codeTurn).equals("-")))
+			m+=usersWithTurns.get(i).searchSpecificTurn(codeTurn);
+		}
+		if(m.equals(""))
+			throw new TurnHadNoAssigned(codeTurn);
+		return m;
 	}
 	
 	public String showPeople() {

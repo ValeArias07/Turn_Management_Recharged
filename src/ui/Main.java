@@ -12,6 +12,7 @@ import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
+import CustomExceptions.TurnHadNoAssigned;
 
 public class Main {
 	
@@ -19,12 +20,14 @@ public class Main {
 	public	Scanner lectorN;
 	public Admin admin;
 	public boolean usersGenerated;
+	public int numberOfGenerated;
 	
 	public Main() throws IOException {
 		lectorN= new Scanner(System.in);
 		lectorL= new Scanner(System.in);
 		admin= new Admin();
 		usersGenerated=false;
+		numberOfGenerated=0;
 	}
 	
 	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException {
@@ -36,7 +39,6 @@ public class Main {
 		
 		System.out.println("Welcome the the Turn Management. Enjoy the program");
 		boolean exit=false;
-		boolean usersGenerated=false;
 		setTypeTurns();
 			while(!exit) {
 				System.out.println("---Current Date and Time---");
@@ -50,8 +52,8 @@ public class Main {
 						+ "\n 5. Attent all the turns till now"
 						+ "\n 6. Generate turns for a defineted time"
 						+ "\n ---REPORTS----"
-						+ "\n 7. Generate a report with all the turns of a specific Person"
-						+ "\n 8. Generate a report with all the persons that had a specific Turn"
+						+ "\n 7. Generate a report with all the turns of a specific Person (solved)"
+						+ "\n 8. Generate a report with all the persons that had a specific Turn (solved)"
 						+ "\n 9. Save information"
 						+ "\n 10. Exit");
 				
@@ -61,14 +63,13 @@ public class Main {
 					addTypeTurn();
 					break;
 				case(2):
-					addUser();
+					addUser();//
 					break;
 				case(3):
-					generateUsers();
-					
+					generateUsers();//
 					break;
 				case(4):
-					assignTurn();
+					assignTurn();//
 					break;
 				case(5):
 					attentTurnsTillNow();
@@ -99,14 +100,15 @@ public class Main {
 		
 	}
 	public void generateUsers() throws IOException, DocumentExistException, ObligatoryFieldsException {
+
 		System.out.println("Write the amount of people to generate");
 		int numPersons=lectorN.nextInt();
 		long timeInitial= System.currentTimeMillis();
-		admin.generateUsers(numPersons);
-		System.out.println(admin.showPeople());
+		System.out.println(admin.generateUsers(numPersons, numberOfGenerated));
 		long finalTime=System.currentTimeMillis()-timeInitial;
 		System.out.println("Time of Ejecution :" + finalTime);
 		setGeneratedUsers(true);
+		numberOfGenerated++;
 	}
 	public void addUser() {
 		boolean sucess=false;
@@ -134,8 +136,11 @@ public class Main {
 				throw new ObligatoryFieldsException();	
 			}
 			else {
+				long timeInitial= System.currentTimeMillis();
 				admin.addUser(typeDoc, numDoc, names, lastNames, phone, address);
 				sucess=true;
+				long finalTime=System.currentTimeMillis()-timeInitial;
+				System.out.println("Time of Ejecution :" + finalTime);
 			}
 		}
 		catch(ObligatoryFieldsException o) {
@@ -163,8 +168,11 @@ public class Main {
 				}
 			}
 			try {
+			long timeInitial= System.currentTimeMillis();
 			System.out.println(admin.registTurn(numDoc));
 			sucessful=true;
+			long finalTime=System.currentTimeMillis()-timeInitial;
+			System.out.println("Time of Ejecution :" + finalTime);
 			}
 			catch(NotFoundException nf) {
 				System.out.println(nf.getMessage());
@@ -188,16 +196,37 @@ public class Main {
 		good=(option==1 || option==2)?true:false;
 		}
 		try{
-		System.out.println(admin.generateReportSpecificPerson(numDoc, option));
+		long timeInitial= System.currentTimeMillis();
+			System.out.println(admin.generateReportSpecificPerson(numDoc, option));
+		long finalTime=System.currentTimeMillis()-timeInitial;
+		System.out.println("Time of Ejecution :" + finalTime);
 		}
 		catch(NotFoundException nf) {
 			System.out.println(nf.getMessage());
 		}
 	}
-	public void generateReportSpecificTurn() {
-		
+	public void generateReportSpecificTurn() throws IOException {
+		boolean good=false;
+		int option=0;
+		System.out.println("Write the code of the Turn");
+		String codeTurn=lectorL.nextLine();
+		while(!good) {
+			System.out.println("1. Read the report in Screen \n2. Save the report in a text file ");
+			option=lectorN.nextInt();
+			good=(option==1 || option==2)?true:false;
+			}
+		try {
+		long timeInitial= System.currentTimeMillis();
+			System.out.println(admin.generateReportSpecificTurn(codeTurn, option));
+		long finalTime=System.currentTimeMillis()-timeInitial;
+		System.out.println("Time of Ejecution :" + finalTime);
+		}
+		catch(TurnHadNoAssigned t) {
+			System.out.println(t.getMessage());
+		}
 	}
 	public void saveInformation() {
+		
 		
 	}
 
