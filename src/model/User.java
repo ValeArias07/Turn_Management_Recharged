@@ -101,18 +101,18 @@ public class User {
 		return letter;
 	}
 
-	public void setTurns(char letter, String number) {
+	public void setTurns(char letter, String number, String type, double duration) {
 		if(Integer.parseInt(number)<9) {
 			number="0"+number;
-			turns.add(new Turn(letter,number));
+			turns.add(new Turn(letter,number,type, duration));
 		}
 		else
 		{
-			turns.add(new Turn(letter,number));
+			turns.add(new Turn(letter,number,type,duration));
 		}
 	}
-	public void setFirst(char letter, String number) {
-		turns.add(new Turn(letter,number));
+	public void setFirst(char letter, String number,String type, double duration) {
+		turns.add(new Turn(letter,number,type,duration));
 	}
 	
 	public void setState(String option) {
@@ -154,6 +154,18 @@ public class User {
 			}
 		}
 		return t;
+	}
+	
+	public String getTypeAndDuration() {
+		boolean found=false;
+		String m="";
+		for (int i = 0; i < turns.size() &&found==false; i++) {
+			if(turns.get(i).getState().equals(Turn.NOTD)) {
+				m=turns.get(i).getType()+" with duration "+ turns.get(i).getDuration();
+				found=true;
+			}
+		}
+		return m;
 	}
 	
 	public String toString() {

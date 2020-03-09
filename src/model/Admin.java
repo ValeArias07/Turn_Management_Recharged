@@ -7,19 +7,23 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
 import CustomExceptions.TurnHadNoAssigned;
+import CustomExceptions.TypesRepeatedException;
 
 
 public class Admin {
 	
 	private ArrayList <User> usersData;
 	private ArrayList <User> usersWithTurns;
+	private ArrayList <Turn> typeOfTurns;
 	private RandomData random;
+	
 	
 	public static String PATH_REPORT_SPECIFIC_PERSON="G:/Eclipse/TurnManagementRecharged/data/ReportSpecificPerson.txt";
 	public static String PATH_REPORT_SPECIFIC_TURN="G:/Eclipse/TurnManagementRecharged/data/ReportSpecificTurn.txt";
@@ -29,8 +33,41 @@ public class Admin {
 		usersData=new ArrayList<User>();
 		usersWithTurns= new ArrayList<User>();
 		random= new RandomData(); 
+		typeOfTurns=new ArrayList <Turn>();
 ///////
 	}
+	
+	public String addTypeOfTurn(String type, double duration) throws TypesRepeatedException {
+		String m="Turn type created sucessful";
+		double durationT=nameRepeated(type);
+		if(durationT==-1) {
+		typeOfTurns.add(new Turn(type, duration));
+		}else {
+			throw new TypesRepeatedException(type, durationT);
+		}
+		return m;
+	}
+	
+	public String showOrderTypes() {
+		Collections.sort(typeOfTurns);
+		String m="";
+		for (int i = 0; i < typeOfTurns.size(); i++) {
+			m+=(i+1)+". "+typeOfTurns.get(i).getType()+" with duration "+ typeOfTurns.get(i).getDuration()+"\n";
+		}
+		if(m.equals("")) 
+			m="No types yet";
+		return m;
+	}
+	
+	public int chooseTypeTurn (int opt, int type) {
+		Collections.sort(typeOfTurns);
+		int choise=0;
+		if(opt==2) {
+			return choise=(int)(Math.random()*typeOfTurns.size());
+		}
+		return type;
+	}
+	
 	
 	public String generateUsers(int numP, int numGen) throws IOException, DocumentExistException, ObligatoryFieldsException{
 		String m="People generated Successfully";
@@ -71,7 +108,8 @@ public class Admin {
 	 * @return turn is the String that represent the User's turn that was assigned 
 	 * @throws NotFoundException it is throwing when the user is not registered in the ArrayList
 	 */
-	public String registTurn(String numDoc) throws NotFoundException{
+	public String registTurn(String numDoc, int opt,int type) throws NotFoundException{
+	Collections.sort(typeOfTurns);
 	int numUbication=0; 
 	char letter;
 	String turn="";
@@ -82,6 +120,7 @@ public class Admin {
 		numDoc=usersData.get(ubicationRandom).getNumDoc();
 	}
 	if(oneTurnOnce(numDoc).equalsIgnoreCase("none")) {
+		int typeTurn=chooseTypeTurn(opt, type);
 		userInUse=searchUserInData(numDoc,ubicationRandom);
 			if(usersWithTurns.size()>0) {
 				letter=usersWithTurns.get(usersWithTurns.size()-1).getTurnLetter();
@@ -89,19 +128,19 @@ public class Admin {
 				
 					if(numUbication>99) {
 						numUbication=0;
-						turn=addTurn(searchLetter(letter), numUbication, userInUse);
+						turn=addTurn(searchLetter(letter), numUbication, userInUse, typeTurn);
 						}
 						else {
-							turn=addTurn(letter, numUbication,userInUse);
+							turn=addTurn(letter, numUbication,userInUse, typeTurn);
 							numUbication++;
 							}
 					}
 					else {
 						usersWithTurns.add(userInUse);
-						userInUse.setFirst('A', "0");
+						userInUse.setFirst('A', "0",typeOfTurns.get(typeTurn-1).getType(),typeOfTurns.get(typeTurn-1).getDuration());
 						turn="A00";
 					}
-		turn="The person " + userInUse.getName()+" "+userInUse.getLastName()+ " with the ID "+ userInUse.getNumDoc() + " has the turn " + turn;
+		turn="The person " + userInUse.getName()+" "+userInUse.getLastName()+ " with the ID "+ userInUse.getNumDoc() + " has the turn " + turn + " of the type " + userInUse.getTypeAndDuration()+"\n";
 	}
 	return turn;
 	}
@@ -178,9 +217,11 @@ public class Admin {
 	 * @param positionUser is the position where the user is in the ArrayList of usersData positionUser<usersData.size()
 	 * @return turn is the turn assigned to the User
 	 */
-	public String addTurn(char letter, int numUbication, User userInUse) {
+	public String addTurn(char letter, int numUbication, User userInUse, int typeTurn) {
+		Collections.sort(typeOfTurns);
+		Turn turnType=typeOfTurns.get(typeTurn-1);
 		usersWithTurns.add(userInUse);
-		userInUse.setTurns(letter,String.valueOf(numUbication));
+		userInUse.setTurns(letter,String.valueOf(numUbication),turnType.getState(),turnType.getDuration());
 		String turn=(numUbication>9)?(letter+String.valueOf(numUbication)):(letter+"0"+String.valueOf(numUbication));
 		return turn;
 	}
@@ -329,5 +370,40 @@ public class Admin {
 				throw new NoTurnYetException();
 		return turn;
 	}
+	//////////////////////////TURN METHODS//////////////////////
 	
+	/**
+	public String addTypeTurns(String type, double duration) throws TypesRepeatedException {
+		String sucess="Turn created sucessfull";
+		Turn pointer=null;
+		double durationT=nameRepeated(type);
+		if(durationT==-1) {
+		if(firstTurn==null) {
+			firstTurn=new Turn(type,duration);
+		}else {
+			pointer=firstTurn;
+			while(pointer.getNextTurn()!=null) {
+				pointer=pointer.getNextTurn();
+			}
+			pointer=new Turn(type,duration);
+		}
+		}else {
+			throw new TypesRepeatedException(type, durationT);
+		}
+		return sucess;
+	}
+	*/
+	public double nameRepeated(String type) {
+		double duration=-1;
+		boolean found=false;
+		if(typeOfTurns.size()>0) {
+		for (int i = 0; i < typeOfTurns.size() && found==false; i++) {
+			if(typeOfTurns.get(i).getType().equals(type)) {
+				duration=typeOfTurns.get(i).getDuration();
+				found=true;
+			}
+		}
+	}
+	return duration;
+}
 }

@@ -13,6 +13,7 @@ import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
 import CustomExceptions.TurnHadNoAssigned;
+import CustomExceptions.TypesRepeatedException;
 
 public class Main {
 	
@@ -39,7 +40,7 @@ public class Main {
 		
 		System.out.println("Welcome the the Turn Management. Enjoy the program");
 		boolean exit=false;
-		setTypeTurns();
+		addTypeTurn();
 			while(!exit) {
 				System.out.println("---Current Date and Time---");
 				dateAndHour();
@@ -48,7 +49,7 @@ public class Main {
 						+ "\n 1. Add a new type of Turn"
 						+ "\n 2. Add a person (solved)"
 						+ "\n 3. Generate users (solved)"
-						+ "\n 4. Asign a turn"
+						+ "\n 4. Asign a turn(solved)"
 						+ "\n 5. Attent all the turns till now"
 						+ "\n 6. Generate turns for a defineted time"
 						+ "\n ---REPORTS----"
@@ -97,8 +98,21 @@ public class Main {
 	
 	
 	public void addTypeTurn() {
-		
-	}
+		System.out.println("Write the amount of types to create");
+		int numT=lectorN.nextInt();
+		for (int i = 0; i < numT; i++) {
+			System.out.println("Write the name of the Turn");
+			String name=lectorL.nextLine();	
+			System.out.println("Write the duration of the Turn");
+			double duration=lectorN.nextDouble();
+			try {
+			System.out.println(admin.addTypeOfTurn(name,duration));
+			}
+			catch(TypesRepeatedException tr){
+				System.out.println(tr.getMessage());
+				}
+		}
+		}
 	public void generateUsers() throws IOException, DocumentExistException, ObligatoryFieldsException {
 
 		System.out.println("Write the amount of people to generate");
@@ -152,10 +166,19 @@ public class Main {
 		}
 	}
 	public void assignTurn() throws NotFoundException, IOException, DocumentExistException, ObligatoryFieldsException {
+		
 		boolean sucessful=false;
 		while(!sucessful) {
 			String numDoc="0";
-			System.out.println("Choose the type of turn");
+			int optCType=0;
+			System.out.println("Choose one option: \n1.Choose type of Turn  \n2.Random type");
+			int optType=lectorN.nextInt();
+			
+			if(optType==1) {
+				System.out.println("Choose the type :");
+				System.out.println(admin.showOrderTypes());
+				optCType=lectorN.nextInt();
+			}
 			System.out.println("1. Assign turn a specific person \n2. Assign turn random");
 			int option=lectorN.nextInt();
 			if(option==1) {
@@ -167,9 +190,10 @@ public class Main {
 					generateUsers();
 				}
 			}
+			
 			try {
 			long timeInitial= System.currentTimeMillis();
-			System.out.println(admin.registTurn(numDoc));
+			System.out.println(admin.registTurn(numDoc,optType,optCType));
 			sucessful=true;
 			long finalTime=System.currentTimeMillis()-timeInitial;
 			System.out.println("Time of Ejecution :" + finalTime);
@@ -239,23 +263,6 @@ public class Main {
 		System.out.println("    " + currentDate.getCompleteDate() + " " +currentHour.getCompleteHour());
 		
 	}
-	
-	public void setTypeTurns() {
-	System.out.println("Write the number of types of turns that you want to create");
-	int numOptions=lectorN.nextInt();
-	String[] typeTurns= new String[numOptions];
-	
-	for (int i = 0; i < typeTurns.length; i++) {
-		System.out.println("Write the names of the types");
-		typeTurns[i]=lectorL.nextLine();
-	}
-	double[] duration= new  double[numOptions];
-	for (int i = 0; i < typeTurns.length; i++) {
-		System.out.println("write the time for the Turn " + typeTurns[i]);
-		double time=lectorN.nextDouble();
-	}
-	}
-	
 	public String defineTypeDoc() {
 		boolean correctOption=false;
 		int option=0;
