@@ -233,6 +233,14 @@ public class Admin implements Serializable{
 		return numDoc;
 	}
 	
+	public boolean checkState(User userInUse) {
+		boolean locked=false;
+		if(userInUse.getfaults()>=2) {
+			locked=true;
+		}
+		return locked;
+	}
+	
 	/**
 	 * This method assign a turn for a User in the Arraylist 
 	 * <b>pre<b/>: The user has to be in the ArrayList and it doesn't have a turn before
@@ -244,6 +252,7 @@ public class Admin implements Serializable{
 	 */
 	public String registTurn(String numDoc, int opt,int type) throws NotFoundException, TypesNotCreatedException{
 	Collections.sort(typeOfTurns);
+	boolean stateUser=false;
 	int year=dateSystem.getYear(), month=dateSystem.getMonth(), dayOfMonth=dateSystem.getDay(), hour=dateSystem.getHour(), minute=dateSystem.getMinutes(),seconds=dateSystem.getSeconds();	int numUbication=0; 
 	char letter;
 	String turn="";
@@ -256,6 +265,8 @@ public class Admin implements Serializable{
 	if(oneTurnOnce(numDoc).equalsIgnoreCase("none")) {
 		int typeTurn=chooseTypeTurn(opt, type);
 		userInUse=searchUserInData(numDoc,ubicationRandom);
+		stateUser=checkState(userInUse);
+		if(!stateUser) {
 			if(usersWithTurns.size()>0) {
 				letter=usersWithTurns.get(usersWithTurns.size()-1).getTurnLetter();
 				numUbication=(usersWithTurns.get(usersWithTurns.size()-1).getTurnNumber())+1;
@@ -275,6 +286,8 @@ public class Admin implements Serializable{
 					}
 		turn="User " + userInUse.getName()+" "+userInUse.getLastName()+ " ID "+ userInUse.getNumDoc() + "\nhas assigned the " + userInUse.getTurnInfo();
 	
+		}else {
+			turn="Sorry, the user is locked till ";
 		}
 	return turn;
 	}

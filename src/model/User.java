@@ -13,6 +13,7 @@ public class User implements Comparable <User>, Serializable{
 	private String typeDoc;
 	private boolean assistence;
 	
+	private int faults;
 	private ArrayList <Turn> turns;
 
 	public User(String ptypeDoc, String pnumDoc, String pname, String pLastName, String pPhone, String pAddress) {
@@ -23,6 +24,7 @@ public class User implements Comparable <User>, Serializable{
 		phone=pPhone;
 		address=pAddress;
 		turns= new ArrayList<Turn>();
+		faults=0;
 	}
 	
 	public void setFirst(char letter, String number,String type, double duration,int year, int month, int dayOfMonth, int hour, int minute, int seconds) {
@@ -156,13 +158,12 @@ public class User implements Comparable <User>, Serializable{
 	 */
 	public void setState(boolean option) {
 			assistence=option;
+			if(option==false) 
+				faults++;
+			else 
+				faults=0;
+				
 			turns.get(turns.size()-1).setState(true);
-					/**for (int i = 0; i < turns.size() &&found==false; i++) {
-					if(turns.get(i).getState()==false) {
-						turns.get(i).setState(option);
-						found=true;
-					}
-					*/
 		}
 	/**
 	 * This method just sort the array turns using the bubble algorithm
@@ -245,6 +246,10 @@ public class User implements Comparable <User>, Serializable{
 	
 	public String getTurnInfo() {
 		return turns.get(turns.size()-1).toString();
+	}
+	
+	public int getfaults() {
+		return faults;
 	}
 	
 	public String toString() {
