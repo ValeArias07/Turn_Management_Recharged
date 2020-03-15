@@ -1,19 +1,21 @@
 package ui;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import model.Admin;
-import model.LocalDate;
-import model.LocalHour;
+import model.LocalDateSystem;
 import model.TypeDocuments;
 import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
 import CustomExceptions.TurnHadNoAssigned;
+import CustomExceptions.TypesNotCreatedException;
 import CustomExceptions.TypesRepeatedException;
+
 
 public class Main {
 	
@@ -23,33 +25,39 @@ public class Main {
 	public boolean usersGenerated;
 	public int numberOfGenerated;
 	
+	
 	public Main() throws IOException {
 		lectorN= new Scanner(System.in);
 		lectorL= new Scanner(System.in);
+		
 		admin= new Admin();
 		usersGenerated=false;
 		numberOfGenerated=0;
 	}
 	
-	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException {
+	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException {
 		Main main= new Main();
 		main.menu();
 	}
 	
-	public void menu() throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException {
-		
+	public void menu() throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException {
 		System.out.println("Welcome the the Turn Management. Enjoy the program");
+		System.out.println("Please, select the option for the system of Date: \n1. Set Date automatically \n2. Set Dat manually");
+		int option=lectorN.nextInt();
+		updateDate(option,0);
 		boolean exit=false;
-		addTypeTurn();
 			while(!exit) {
+				admin.setNewComputerDate();
+				admin.updateDateSystem();
 				System.out.println("---Current Date and Time---");
-				dateAndHour();
+				System.out.println("    "+admin.getCompleteDate());
 				System.out.println("---------------------------");
 				System.out.println("Please, choose an option:"
+						+ "\n 0. Update the date"
 						+ "\n 1. Add a new type of Turn"
-						+ "\n 2. Add a person (solved)"
-						+ "\n 3. Generate users (solved)"
-						+ "\n 4. Asign a turn(solved)"
+						+ "\n 2. Add a person"
+						+ "\n 3. Generate users"
+						+ "\n 4. Asign a turn"
 						+ "\n 5. Attent all the turns till now"
 						+ "\n 6. Generate turns for a defineted time"
 						+ "\n ---REPORTS----"
@@ -60,17 +68,20 @@ public class Main {
 				
 			int choice=lectorN.nextInt();
 			switch(choice) {
+				case(0):
+					updateDate(2,1);
+					break;
 				case(1):
 					addTypeTurn();
 					break;
 				case(2):
-					addUser();//
+					addUser();
 					break;
 				case(3):
-					generateUsers();//
+					generateUsers();
 					break;
 				case(4):
-					assignTurn();//
+					assignTurn();
 					break;
 				case(5):
 					attentTurnsTillNow();
@@ -112,18 +123,20 @@ public class Main {
 				System.out.println(tr.getMessage());
 				}
 		}
-		}
+	}
+	
 	public void generateUsers() throws IOException, DocumentExistException, ObligatoryFieldsException {
 
 		System.out.println("Write the amount of people to generate");
 		int numPersons=lectorN.nextInt();
 		long timeInitial= System.currentTimeMillis();
-		System.out.println(admin.generateUsers(numPersons, numberOfGenerated));
 		long finalTime=System.currentTimeMillis()-timeInitial;
+		System.out.println(admin.generateUsers(numPersons,numberOfGenerated));
 		System.out.println("Time of Ejecution :" + finalTime);
 		setGeneratedUsers(true);
 		numberOfGenerated++;
 	}
+	
 	public void addUser() {
 		boolean sucess=false;
 		while(!sucess) {
@@ -143,7 +156,6 @@ public class Main {
 		
 		System.out.println("Write the person's address");
 		String address=lectorL.nextLine();
-
 
 		try {
 			if(numDoc.equalsIgnoreCase(" ") || names.equalsIgnoreCase(" ") || lastNames.equalsIgnoreCase(" ")) {
@@ -165,22 +177,43 @@ public class Main {
 			}
 		}
 	}
-	public void assignTurn() throws NotFoundException, IOException, DocumentExistException, ObligatoryFieldsException {
+	
+	public void assignTurn() throws NotFoundException, IOException, DocumentExistException, ObligatoryFieldsException, TypesNotCreatedException {
 		
 		boolean sucessful=false;
+		boolean typesExist=false;
+
 		while(!sucessful) {
 			String numDoc="0";
 			int optCType=0;
 			System.out.println("Choose one option: \n1.Choose type of Turn  \n2.Random type");
 			int optType=lectorN.nextInt();
 			
+		while(!typesExist) {
 			if(optType==1) {
-				System.out.println("Choose the type :");
-				System.out.println(admin.showOrderTypes());
-				optCType=lectorN.nextInt();
+				try {
+					System.out.println("Choose the types\n" + admin.showOrderTypes());
+					optCType=lectorN.nextInt();
+					typesExist=true;
+				}
+				catch(TypesNotCreatedException tnc) {
+					System.out.println(tnc.getMessage()+tnc.getExampleType());
+					addTypeTurn();
+				}
+			}else {
+				try {
+					admin.showOrderTypes();
+					typesExist=true;
+				}
+				catch(TypesNotCreatedException tnc) {
+					System.out.println(tnc.getMessage()+tnc.getExampleType());
+					addTypeTurn();
+				}
 			}
+		}
 			System.out.println("1. Assign turn a specific person \n2. Assign turn random");
 			int option=lectorN.nextInt();
+			
 			if(option==1) {
 				System.out.println("Write the number of Document");
 				numDoc=lectorL.nextLine();
@@ -193,22 +226,29 @@ public class Main {
 			
 			try {
 			long timeInitial= System.currentTimeMillis();
-			System.out.println(admin.registTurn(numDoc,optType,optCType));
+			try {
+			System.out.println("###############\n" + admin.registTurn(numDoc,optType,optCType)+"\n###############");
+			}
+			finally {
 			sucessful=true;
 			long finalTime=System.currentTimeMillis()-timeInitial;
 			System.out.println("Time of Ejecution :" + finalTime);
 			}
+			}
 			catch(NotFoundException nf) {
 				System.out.println(nf.getMessage());
 				}
+			}
 		}
-	}
+	
 	public void attentTurnsTillNow() {
-		
+		System.out.println(admin.AttendTillNow());
 	}
+	
 	public void generateTurnsWithTime() {
 		
 	}
+	
 	public void generateReportSpecificPerson() throws NotFoundException, IOException {
 		boolean good=false;
 		int option=0;
@@ -229,6 +269,7 @@ public class Main {
 			System.out.println(nf.getMessage());
 		}
 	}
+	
 	public void generateReportSpecificTurn() throws IOException {
 		boolean good=false;
 		int option=0;
@@ -249,20 +290,43 @@ public class Main {
 			System.out.println(t.getMessage());
 		}
 	}
-	public void saveInformation() {
-		
-		
+	
+	public void saveInformation() throws IOException {
+		System.out.println("Information saved succesfuly in the root "+admin.SAVE_ROOT);
+		admin.saveInformation();
+	}
+	
+	public void loadInformation() throws ClassNotFoundException, IOException {
+		System.out.println("Information loaded succesfuly from the root "+admin.SAVE_ROOT);
+		admin.loadInformation();
 	}
 
-	//////COMPLETEMENT/////// 
 	
-	public void dateAndHour() {
-		Date current= new Date();
-		LocalDate currentDate= new LocalDate((current.getYear() +1900),(current.getMonth()+1),(current.getDay()+1));
-		LocalHour currentHour= new LocalHour((current.getHours()+2),current.getMinutes(),current.getSeconds());
-		System.out.println("    " + currentDate.getCompleteDate() + " " +currentHour.getCompleteHour());
+	public void updateDate(int option, int type){
+		if(option==1) {
+			admin.setDate();
+		}else {
+		System.out.println("Remember, you can only change the date of one superior. \nPlease, write the date YEAR/MONTH/DAY: ");
+		String date=lectorL.nextLine();
 		
+		int year=Integer.parseInt(date.split("/")[0]);
+		int month=Integer.parseInt(date.split("/")[1]);
+		int day=Integer.parseInt(date.split("/")[2]);
+		
+		System.out.println("Now, write the hour with the format HOUR:MINUTE:SECOND");
+		String time=lectorL.nextLine();
+		int hour=Integer.parseInt(time.split(":")[0]);
+		int minutes=Integer.parseInt(time.split(":")[1]);
+		int seconds=Integer.parseInt(time.split(":")[2]);
+		
+		if(type==0) {
+			admin.setDate(year, month, day, hour, minutes, seconds);
+			}else{
+				System.out.println(admin.updateDate(year, month, day, hour, minutes, seconds));
+			}
+		}
 	}
+
 	public String defineTypeDoc() {
 		boolean correctOption=false;
 		int option=0;
@@ -298,8 +362,10 @@ public class Main {
 		}
 	return typeDoc;	
 	}
+	
 	public void setGeneratedUsers(boolean state){
 		usersGenerated=state;
 	}
 
+	
 	}
