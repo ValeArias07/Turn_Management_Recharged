@@ -28,7 +28,8 @@ import CustomExceptions.TypesNotCreatedException;
 import CustomExceptions.TypesRepeatedException;
 
 public class Admin implements Serializable{
-	
+
+	private static final long serialVersionUID = 1L;
 	private ArrayList <User> usersData;
 	private ArrayList <User> usersWithTurns;
 	private ArrayList <TypeTurn> typeOfTurns;

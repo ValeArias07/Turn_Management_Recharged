@@ -33,7 +33,6 @@ public class Main {
 	public boolean usersGenerated;
 	public int numberOfGenerated;
 	
-	
 	public Main() throws IOException, ClassNotFoundException {
 		lectorN= new Scanner(System.in);
 		lectorL= new Scanner(System.in);
@@ -41,12 +40,12 @@ public class Main {
 		admin= new Admin();
 		usersGenerated=false;
 		numberOfGenerated=0;
-		load();
 	}
 	
 	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException, ClassNotFoundException {
 		Main main= new Main();
 		main.menu();
+		
 	}
 	
 	public void menu() throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException, ClassNotFoundException {
