@@ -1,7 +1,14 @@
 package ui;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -27,13 +34,14 @@ public class Main {
 	public int numberOfGenerated;
 	
 	
-	public Main() throws IOException {
+	public Main() throws IOException, ClassNotFoundException {
 		lectorN= new Scanner(System.in);
 		lectorL= new Scanner(System.in);
 		
 		admin= new Admin();
 		usersGenerated=false;
 		numberOfGenerated=0;
+		load();
 	}
 	
 	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException, ClassNotFoundException {
@@ -63,7 +71,7 @@ public class Main {
 						+ "\n ---REPORTS----"
 						+ "\n 7. Generate a report with all the turns of a specific Person (solved)"
 						+ "\n 8. Generate a report with all the persons that had a specific Turn (solved)"
-						+ "\n 9. Save or Load information"
+						+ "\n 9. Show users in System"
 						+ "\n 10. Exit");
 				
 			int choice=lectorN.nextInt();
@@ -93,7 +101,7 @@ public class Main {
 					generateReportSpecificTurn();
 					break;
 				case(9):
-					saveOrLoadInformation();
+					System.out.println(admin.showPeople());
 					break;
 				case(10):
 					exit=true;
@@ -287,8 +295,9 @@ public class Main {
 		}
 	}
 	
+	
 	public void saveOrLoadInformation() throws IOException,ClassNotFoundException {
-		System.out.println("Write \1. Save Information \n2. Load Informatio");
+		System.out.println("Write \n1. Save Information \n2. Load Information");
 		int opt=lectorN.nextInt();
 		if(opt==1) {
 		admin.saveInformation();
@@ -359,6 +368,41 @@ public class Main {
 		}
 	return typeDoc;	
 	}
+	
+	public void save() {
+        File file = new File(Admin.SAVE_ROOT);
+        if(!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        try {
+            FileOutputStream adminFOut = new FileOutputStream(file);
+            ObjectOutputStream adminObjOut = new ObjectOutputStream(adminFOut);
+            adminObjOut.writeObject(Admin.SAVE_ROOT);
+            adminObjOut.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+	
+	public void load() throws ClassNotFoundException {
+        File file = new File(Admin.SAVE_ROOT);
+        if(file.exists()) {
+            try {
+                FileInputStream adminFIn = new FileInputStream(Admin.SAVE_ROOT);
+                ObjectInputStream adminObjIn;
+                adminObjIn = new ObjectInputStream(adminFIn);
+                admin = (Admin)adminObjIn.readObject();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
 	
 	public void setGeneratedUsers(boolean state){
 		usersGenerated=state;
