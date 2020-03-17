@@ -22,6 +22,7 @@ import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
+import CustomExceptions.OnceTurnException;
 import CustomExceptions.TurnHadNoAssigned;
 import CustomExceptions.TypesNotCreatedException;
 import CustomExceptions.TypesRepeatedException;
@@ -235,8 +236,18 @@ public class Admin implements Serializable{
 	
 	public boolean checkState(User userInUse) {
 		boolean locked=false;
+	if(userInUse.getDateFaults()==null) {
 		if(userInUse.getfaults()>=2) {
+			userInUse.setFaultDate(dateSystem);
 			locked=true;
+		}
+		}else {
+			Duration duration=Duration.between(userInUse.getDateFaults().getDate(), dateSystem.getDate());
+			if(duration.getSeconds()>=172800) {
+				locked=false;
+			}else {
+				locked=true;
+			}
 		}
 		return locked;
 	}
@@ -249,13 +260,14 @@ public class Admin implements Serializable{
 	 * @return turn is the String that represent the User's turn that was assigned 
 	 * @throws NotFoundException it is throwing when the user is not registered in the ArrayList
 	 * @throws TypesNotCreatedException 
+	 * @throws OnceTurnException 
 	 */
-	public String registTurn(String numDoc, int opt,int type) throws NotFoundException, TypesNotCreatedException{
+	public String registTurn(String numDoc, int opt,int type) throws NotFoundException, TypesNotCreatedException, OnceTurnException{
 	Collections.sort(typeOfTurns);
 	boolean stateUser=false;
 	int year=dateSystem.getYear(), month=dateSystem.getMonth(), dayOfMonth=dateSystem.getDay(), hour=dateSystem.getHour(), minute=dateSystem.getMinutes(),seconds=dateSystem.getSeconds();	int numUbication=0; 
 	char letter;
-	String turn="";
+	String turn="Sorry, that user have an active turn";
 	User userInUse;
 	int ubicationRandom=-1;
 
@@ -289,6 +301,7 @@ public class Admin implements Serializable{
 		}else {
 			turn="Sorry, the user is locked till ";
 		}
+	}
 	return turn;
 	}
 	
@@ -382,7 +395,7 @@ public class Admin implements Serializable{
 	public String oneTurnOnce(String numDoc) {
 		boolean found=false;
 		String turn="none";
-		if(usersWithTurns.size()>0) {
+		if(usersWithTurns.size()>=0) {
 		for(int i=0; i<usersWithTurns.size() && found==false;i++) {
 			if(numDoc.equals(usersWithTurns.get(i).getNumDoc())) {
 				if(usersWithTurns.get(i).isAttent()==false)
@@ -472,7 +485,6 @@ public class Admin implements Serializable{
 			searchUserRepeated(numDoc);
 				usersData.add(new User(typeDoc, numDoc, name, lastName, phone, address));
 	}
-	
 	/**
 	 * This method generate a n amount of users with random information.
 	 * @param numP This is the amount of users to create

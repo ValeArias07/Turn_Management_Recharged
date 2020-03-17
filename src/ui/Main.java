@@ -12,6 +12,7 @@ import CustomExceptions.DocumentExistException;
 import CustomExceptions.NoTurnYetException;
 import CustomExceptions.NotFoundException;
 import CustomExceptions.ObligatoryFieldsException;
+import CustomExceptions.OnceTurnException;
 import CustomExceptions.TurnHadNoAssigned;
 import CustomExceptions.TypesNotCreatedException;
 import CustomExceptions.TypesRepeatedException;
@@ -35,12 +36,12 @@ public class Main {
 		numberOfGenerated=0;
 	}
 	
-	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException {
+	public static void main (String args[]) throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException, ClassNotFoundException {
 		Main main= new Main();
 		main.menu();
 	}
 	
-	public void menu() throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException {
+	public void menu() throws IOException, DocumentExistException, ObligatoryFieldsException, NotFoundException, TypesNotCreatedException, ClassNotFoundException {
 		System.out.println("Welcome the the Turn Management. Enjoy the program");
 		System.out.println("Please, select the option for the system of Date: \n1. Set Date automatically \n2. Set Dat manually");
 		int option=lectorN.nextInt();
@@ -53,41 +54,37 @@ public class Main {
 				System.out.println("    "+admin.getCompleteDate());
 				System.out.println("---------------------------");
 				System.out.println("Please, choose an option:"
-						+ "\n 0. Update the date"
-						+ "\n 1. Add a new type of Turn"
-						+ "\n 2. Add a person"
-						+ "\n 3. Generate users"
-						+ "\n 4. Asign a turn"
-						+ "\n 5. Attent all the turns till now"
-						+ "\n 6. Generate turns for a defineted time"
+						+ "\n 1. Update the date"
+						+ "\n 2. Add a new type of Turn"
+						+ "\n 3. Add a person"
+						+ "\n 4. Generate users"
+						+ "\n 5. Asign a turn"
+						+ "\n 6. Attent all the turns till now"
 						+ "\n ---REPORTS----"
 						+ "\n 7. Generate a report with all the turns of a specific Person (solved)"
 						+ "\n 8. Generate a report with all the persons that had a specific Turn (solved)"
-						+ "\n 9. Save information"
+						+ "\n 9. Save or Load information"
 						+ "\n 10. Exit");
 				
 			int choice=lectorN.nextInt();
 			switch(choice) {
-				case(0):
+				case(1):
 					updateDate(2,1);
 					break;
-				case(1):
+				case(2):
 					addTypeTurn();
 					break;
-				case(2):
+				case(3):
 					addUser();
 					break;
-				case(3):
+				case(4):
 					generateUsers();
 					break;
-				case(4):
+				case(5):
 					assignTurn();
 					break;
-				case(5):
-					attentTurnsTillNow();
-					break;
 				case(6):
-					generateTurnsWithTime();
+					attentTurnsTillNow();
 					break;
 				case(7):
 					generateReportSpecificPerson();
@@ -96,7 +93,7 @@ public class Main {
 					generateReportSpecificTurn();
 					break;
 				case(9):
-					saveInformation();
+					saveOrLoadInformation();
 					break;
 				case(10):
 					exit=true;
@@ -229,11 +226,14 @@ public class Main {
 			try {
 			System.out.println("###############\n" + admin.registTurn(numDoc,optType,optCType)+"\n###############");
 			}
+			catch(OnceTurnException ot) {
+				ot.getMessage();
+			}
 			finally {
 			sucessful=true;
 			long finalTime=System.currentTimeMillis()-timeInitial;
 			System.out.println("Time of Ejecution :" + finalTime);
-			}
+				}
 			}
 			catch(NotFoundException nf) {
 				System.out.println(nf.getMessage());
@@ -243,10 +243,6 @@ public class Main {
 	
 	public void attentTurnsTillNow() {
 		System.out.println(admin.AttendTillNow());
-	}
-	
-	public void generateTurnsWithTime() {
-		
 	}
 	
 	public void generateReportSpecificPerson() throws NotFoundException, IOException {
@@ -291,16 +287,17 @@ public class Main {
 		}
 	}
 	
-	public void saveInformation() throws IOException {
-		System.out.println("Information saved succesfuly in the root "+admin.SAVE_ROOT);
+	public void saveOrLoadInformation() throws IOException,ClassNotFoundException {
+		System.out.println("Write \1. Save Information \n2. Load Informatio");
+		int opt=lectorN.nextInt();
+		if(opt==1) {
 		admin.saveInformation();
+		System.out.println("Information saved succesfuly in the root "+admin.SAVE_ROOT);
+		}else if(opt==2) {
+			admin.loadInformation();
+			System.out.println("Information loaded succesfuly from the root "+admin.SAVE_ROOT);
+		}
 	}
-	
-	public void loadInformation() throws ClassNotFoundException, IOException {
-		System.out.println("Information loaded succesfuly from the root "+admin.SAVE_ROOT);
-		admin.loadInformation();
-	}
-
 	
 	public void updateDate(int option, int type){
 		if(option==1) {

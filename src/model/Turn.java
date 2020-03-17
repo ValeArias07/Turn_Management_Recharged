@@ -64,8 +64,7 @@ public class Turn {
 	/////localDateT.getYear()+"/"+localDateT.getMonth()+"/"+localDateT.getDay()+"  "+localDateT.getHour()+":"+localDateT.getMinutes()+":"+localDateT.getSeconds();
 	}
 	public String toString() {
-		return "Turn: "+letter+""+number+"type "
-				+ ""+typeT.getType()+" with a duration: "+typeT.getDuration()+" \nTurn Date:"+"["+getDateValue()+"]";
+		return "Turn: "+letter+number+" type"+" "+typeT.getType()+" with a duration: "+typeT.getDuration()+" \nTurn Date:"+"["+getDateValue()+"]";
 	}
 
 

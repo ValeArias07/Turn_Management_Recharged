@@ -3,6 +3,8 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import CustomExceptions.OnceTurnException;
+
 public class User implements Comparable <User>, Serializable{
 	
 	private String name;
@@ -14,6 +16,7 @@ public class User implements Comparable <User>, Serializable{
 	private boolean assistence;
 	
 	private int faults;
+	private LocalDateSystem faultDate;
 	private ArrayList <Turn> turns;
 
 	public User(String ptypeDoc, String pnumDoc, String pname, String pLastName, String pPhone, String pAddress) {
@@ -24,6 +27,7 @@ public class User implements Comparable <User>, Serializable{
 		phone=pPhone;
 		address=pAddress;
 		turns= new ArrayList<Turn>();
+		faultDate=null;
 		faults=0;
 	}
 	
@@ -120,10 +124,12 @@ public class User implements Comparable <User>, Serializable{
 	 * This method gives the letter of the active turn 
 	 * @return letter is the letter of the active turn
 	 */
-	public char getTurnLetter() {
+	public char getTurnLetter() throws OnceTurnException{
 		char letter='-';
 		if(turns.get(turns.size()-1).getState()==false) {
 				letter=turns.get(turns.size()-1).getLetter();
+		}else {
+			throw new OnceTurnException();
 		}
 		return letter;
 	}
@@ -250,6 +256,14 @@ public class User implements Comparable <User>, Serializable{
 	
 	public int getfaults() {
 		return faults;
+	}
+	
+	public LocalDateSystem getDateFaults() {
+		return faultDate;
+	}
+	
+	public void setFaultDate(LocalDateSystem faultD) {
+		faultDate=new LocalDateSystem(faultD.getYear(),faultD.getMonth(),faultD.getDay(),faultD.getHour(),faultD.getMinutes(),faultD.getSeconds());
 	}
 	
 	public String toString() {
